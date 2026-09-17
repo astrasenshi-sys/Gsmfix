@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" class="w-56 h-64 mx-auto drop-shadow-lg">
+  <!-- Card Background -->
+  <rect width="240" height="280" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  <!-- Header Bar -->
+  <path d="M0 16C0 7.16344 7.16344 0 16 0H224C232.837 0 240 7.16344 240 16V45H0V16Z" fill="#e11d48"/>
+  <text x="120" y="28" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="bold" font-size="14" text-anchor="middle">Fonepay / Mobile Banking</text>
+  <!-- QR Code Matrix Frame -->
+  <rect x="25" y="55" width="190" height="190" rx="12" fill="#ffffff"/>
+  <!-- Position Detection Patterns (Top-Left) -->
+  <rect x="40" y="70" width="40" height="40" fill="#0f172a" rx="4"/>
+  <rect x="46" y="76" width="28" height="28" fill="#ffffff" rx="2"/>
+  <rect x="52" y="82" width="16" height="16" fill="#e11d48" rx="1"/>
+  <!-- Position Detection Patterns (Top-Right) -->
+  <rect x="160" y="70" width="40" height="40" fill="#0f172a" rx="4"/>
+  <rect x="166" y="76" width="28" height="28" fill="#ffffff" rx="2"/>
+  <rect x="172" y="82" width="16" height="16" fill="#e11d48" rx="1"/>
+  <!-- Position Detection Patterns (Bottom-Left) -->
+  <rect x="40" y="190" width="40" height="40" fill="#0f172a" rx="4"/>
+  <rect x="46" y="196" width="28" height="28" fill="#ffffff" rx="2"/>
+  <rect x="52" y="202" width="16" height="16" fill="#e11d48" rx="1"/>
+  <!-- Synthetic QR Dots & Cells -->
+  <g fill="#0f172a">
+    <rect x="90" y="72" width="10" height="10"/>
+    <rect x="110" y="72" width="10" height="10"/>
+    <rect x="130" y="72" width="20" height="10"/>
+    <rect x="90" y="90" width="20" height="10"/>
+    <rect x="120" y="90" width="10" height="20"/>
+    <rect x="140" y="90" width="10" height="10"/>
+    <rect x="40" y="120" width="20" height="10"/>
+    <rect x="70" y="120" width="10" height="20"/>
+    <rect x="90" y="110" width="20" height="20"/>
+    <rect x="120" y="120" width="20" height="10"/>
+    <rect x="150" y="110" width="20" height="20"/>
+    <rect x="180" y="120" width="20" height="10"/>
+    <rect x="40" y="150" width="10" height="20"/>
+    <rect x="60" y="140" width="20" height="10"/>
+    <rect x="90" y="140" width="10" height="10"/>
+    <rect x="110" y="140" width="20" height="20"/>
+    <rect x="140" y="140" width="20" height="10"/>
+    <rect x="170" y="150" width="10" height="20"/>
+    <rect x="190" y="140" width="10" height="10"/>
+    <rect x="90" y="170" width="20" height="10"/>
+    <rect x="120" y="170" width="10" height="20"/>
+    <rect x="140" y="160" width="20" height="20"/>
+    <rect x="170" y="180" width="20" height="10"/>
+    <rect x="90" y="200" width="10" height="20"/>
+    <rect x="110" y="210" width="20" height="10"/>
+    <rect x="140" y="190" width="10" height="20"/>
+    <rect x="160" y="210" width="30" height="10"/>
+  </g>
+  <!-- Center Logo Badge in QR -->
+  <circle cx="120" cy="150" r="16" fill="#ffffff" stroke="#e11d48" stroke-width="2"/>
+  <text x="120" y="154" fill="#e11d48" font-family="system-ui, sans-serif" font-weight="900" font-size="10" text-anchor="middle">Fonepay</text>
+  <!-- Footer Account ID -->
+  <text x="120" y="263" fill="#94a3b8" font-family="monospace" font-weight="bold" font-size="11" text-anchor="middle">A/C: 020100459281</text>
+</svg>
