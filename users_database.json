@@ -1,0 +1,26 @@
+[
+  {
+    "id": "user_bhuwan",
+    "name": "Bhuwan Bastola",
+    "username": "bhuwan",
+    "email": "bhuwan@bastola.com.np",
+    "password": "password123",
+    "pass": "password123",
+    "shop": "Gopal Electronics (Surkhet)",
+    "role": "admin",
+    "isVip": true,
+    "registeredAt": "2026-01-01T00:00:00Z"
+  },
+  {
+    "id": "user_demo",
+    "name": "Workshop Technician",
+    "username": "demo",
+    "email": "demo@gsmhub.com",
+    "password": "tech123",
+    "pass": "tech123",
+    "shop": "Nepal Mobile Lab",
+    "role": "technician",
+    "isVip": false,
+    "registeredAt": "2026-02-15T00:00:00Z"
+  }
+]
