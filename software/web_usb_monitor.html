@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GSM Fix Hub — WebUSB / WebSerial Live Mobile Hardware Detector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+    .pulse-dot { animation: pulse-glow 2s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-cyan-500/30 py-4 px-6 shadow-xl">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-950 border border-cyan-500/50 flex items-center justify-center text-cyan-400 font-bold shadow-lg shadow-cyan-500/20">
+          USB
+        </div>
+        <div>
+          <h1 class="text-lg font-black text-white flex items-center space-x-2">
+            <span>GSM FIX HUB — WEB USB & SERIAL DETECTOR</span>
+            <span class="text-[9px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-mono border border-cyan-500/30">HTML5 LIVE</span>
+          </h1>
+          <p class="text-xs text-slate-400">Lead Architect: <strong class="text-cyan-400">Bhuwan Bastola</strong> | Gopal Electronics, Surkhet</p>
+        </div>
+      </div>
+      <a href="../index.html" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all">
+        &larr; Return to Web Portal
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto p-6 flex-grow w-full space-y-6">
+
+    <!-- Instructions Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/30 font-mono">Browser Hardware Bridge</span>
+          <h2 class="text-base sm:text-lg font-bold text-white mt-1">Plug In Any Mobile Device via USB Cable</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Detects Fastboot, MTP, Qualcomm 9008, MediaTek BROM, and Samsung Odin modes natively via WebUSB & Web Serial APIs.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button id="btn-request-usb" class="px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-cyan-500/20 transition-all flex items-center space-x-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17"/></svg>
+            <span>Scan / Connect USB Device</span>
+          </button>
+          <button id="btn-request-serial" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 font-bold text-xs rounded-xl transition-all flex items-center space-x-1.5">
+            <span>Scan COM Serial Port</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+        <!-- Auto-Open Flash File Notification Banner -->
+    <div id="auto-redirect-banner" class="hidden p-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-emerald-500/20 to-cyan-500/20 border border-cyan-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg shadow-cyan-500/10">
+      <div class="flex items-center space-x-3">
+        <div class="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin shrink-0"></div>
+        <div>
+          <span class="text-xs font-bold text-white block">Mobile Device Connected! Automatically opening Flash Files in <span id="redirect-countdown" class="text-cyan-300 font-mono text-sm font-extrabold">2</span>s...</span>
+          <span id="redirect-target-text" class="text-[10px] text-slate-400 block mt-0.5">Direct link: GSM Fix Hub Stock ROMs & Flash Files Directory</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 shrink-0">
+        <button onclick="cancelAutoRedirect()" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors">Cancel</button>
+        <button onclick="proceedAutoRedirect()" class="px-3.5 py-1.5 text-xs bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold rounded-xl transition-all shadow-md shadow-cyan-500/20">Open Flash Files Now</button>
+      </div>
+    </div>
+
+    <!-- Active Hardware Status Panel -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Detected Mode Card -->
+      <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+              <span id="indicator-dot" class="w-3 h-3 rounded-full bg-slate-600 pulse-dot"></span>
+              <span id="indicator-text" class="text-xs font-mono font-bold text-slate-400">WAITING FOR USB DEVICE CONNECTION</span>
+            </div>
+            <span id="detected-badge" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-400">NO DEVICE</span>
+          </div>
+
+          <h3 id="device-title" class="text-xl font-black text-white">Device Status: Disconnected</h3>
+          <p id="device-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">Connect your phone in Fastboot, Recovery, MTP, MTK BROM, or Qualcomm EDL 9008 mode using a high-speed data cable.</p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 border border-slate-800/80 rounded-xl p-3.5 my-4 text-xs font-mono">
+            <div>
+              <span class="text-slate-500 text-[10px] block">VENDOR ID</span>
+              <span id="attr-vid" class="text-slate-300 font-bold">----</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block">PRODUCT ID</span>
+              <span id="attr-pid" class="text-cyan-400 font-bold">----</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block">DETECTED MODE</span>
+              <span id="attr-mode" class="text-amber-400 font-bold">Idle</span>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px] block">COM / INTERFACE</span>
+              <span id="attr-port" class="text-emerald-400 font-bold">USB Host</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Automatic Link Actions -->
+        <div id="action-links-container" class="mt-2 pt-4 border-t border-slate-800 flex flex-wrap gap-2.5">
+          <button id="btn-link-rom" onclick="openMatchingRom(event)" class="px-3.5 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all shadow-md shadow-cyan-500/20 flex items-center space-x-1.5 cursor-pointer">
+            <span>🌐 Open Matching Firmware</span>
+          </button>
+          <a id="btn-link-tools" href="../index.html#flashing-tools" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40 text-xs font-bold rounded-xl transition-all">
+            <span>🛠️ Recommended Flashing Tool</span>
+          </a>
+          <a id="btn-link-pinouts" href="../index.html#testpoints" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 text-xs font-bold rounded-xl transition-all">
+            <span>📌 View Motherboard Pinouts</span>
+          </a>
+          <a id="btn-link-videos" href="../index.html#video-tutorials" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/40 text-xs font-bold rounded-xl transition-all">
+            <span>🎓 Watch Masterclass</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Test Simulators Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-white mb-1">Laboratory Mode Simulators</h3>
+          <p class="text-xs text-slate-400 mb-4">Click to simulate hardware plug-in and test automatic link routing instantly:</p>
+
+          <div class="space-y-2">
+            <button onclick="simulateHardware('05C6', '9008', 'Qualcomm Snapdragon EDL 9008 Mode', 'QFIL v2.0.3.5', '#flashing-tools', 'bg-rose-500/20 text-rose-400 border-rose-500/30')" class="w-full text-left p-2.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/40 transition-all">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-white">Qualcomm EDL 9008</span>
+                <span class="text-[10px] font-mono text-rose-400">05C6:9008</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Simulates Sahara firehose handshake unbrick</span>
+            </button>
+
+            <button onclick="simulateHardware('0E8D', '0003', 'MediaTek BootROM (BROM) SLA Mode', 'SP Flash Tool v5.2124', '#flashing-tools', 'bg-amber-500/20 text-amber-400 border-amber-500/30')" class="w-full text-left p-2.5 rounded-xl bg-slate-950 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/40 transition-all">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-white">MediaTek BROM Auth</span>
+                <span class="text-[10px] font-mono text-amber-400">0E8D:0003</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Simulates LibUSB filter SLA/DAA handshake</span>
+            </button>
+
+            <button onclick="simulateHardware('04E8', '685D', 'Samsung Galaxy Odin Download Mode', 'Odin3 v3.14.4 Patched', '#flash-files', 'bg-blue-500/20 text-blue-400 border-blue-500/30')" class="w-full text-left p-2.5 rounded-xl bg-slate-950 hover:bg-blue-500/10 border border-slate-800 hover:border-blue-500/40 transition-all">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-white">Samsung Odin Mode</span>
+                <span class="text-[10px] font-mono text-blue-400">04E8:685D</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Simulates 4-File TAR flashing session</span>
+            </button>
+
+            <button onclick="simulateHardware('18D1', '4EE0', 'Android Fastboot / Bootloader', 'Mi Flash 2024', '#flash-files', 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30')" class="w-full text-left p-2.5 rounded-xl bg-slate-950 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/40 transition-all">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-white">Fastboot Bootloader</span>
+                <span class="text-[10px] font-mono text-cyan-400">18D1:4EE0</span>
+              </div>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Simulates fastboot partition query</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800 text-[10px] text-slate-500 font-mono text-center">
+          Works on Chrome, Edge & Opera on Windows / Linux / Android OTG
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Event Log -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider font-mono">Live Hardware Connection Log</h3>
+        <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-white">Clear</button>
+      </div>
+      <div id="event-log" class="bg-slate-950 border border-slate-800/80 rounded-xl p-3.5 h-36 overflow-y-auto font-mono text-xs text-cyan-400 space-y-1">
+        <div>[SYSTEM READY] WebUSB & WebSerial live detector initialized.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function logMsg(msg) {
+      const log = document.getElementById('event-log');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.textContent = `[${time}] ${msg}`;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('event-log').innerHTML = '';
+      logMsg('Log cleared.');
+    }
+
+    let currentDetectedBrand = "Samsung";
+    let targetRedirectUrl = "../index.html?brand=Samsung#flash-files";
+    let redirectTimer = null;
+
+    function openMatchingRom(e) {
+      if (e) e.preventDefault();
+      const brand = currentDetectedBrand || "Samsung";
+      try {
+        localStorage.setItem("gsm_pending_filter", brand);
+      } catch(err) {}
+      logMsg("Opening matching " + brand + " Flash Files in portal...");
+      window.location.href = "../index.html?brand=" + encodeURIComponent(brand) + "#flash-files";
+    }
+
+    function startAutoRedirect(targetHash, brandName) {
+      currentDetectedBrand = brandName || "Samsung";
+      try {
+        localStorage.setItem("gsm_pending_filter", currentDetectedBrand);
+      } catch(e) {}
+      
+      targetRedirectUrl = "../index.html?brand=" + encodeURIComponent(currentDetectedBrand) + "#flash-files";
+      const banner = document.getElementById("auto-redirect-banner");
+      const countElem = document.getElementById("redirect-countdown");
+      const targetText = document.getElementById("redirect-target-text");
+      
+      if (banner) banner.classList.remove("hidden");
+      if (targetText) targetText.textContent = "Target: Flash Files pre-filtered to " + currentDetectedBrand + " firmware packages";
+
+      let seconds = 2;
+      if (countElem) countElem.textContent = seconds;
+
+      if (redirectTimer) clearInterval(redirectTimer);
+      redirectTimer = setInterval(() => {
+        seconds--;
+        if (countElem) countElem.textContent = seconds;
+        if (seconds <= 0) {
+          clearInterval(redirectTimer);
+          proceedAutoRedirect();
+        }
+      }, 1000);
+    }
+
+    function cancelAutoRedirect() {
+      if (redirectTimer) clearInterval(redirectTimer);
+      const banner = document.getElementById("auto-redirect-banner");
+      if (banner) banner.classList.add("hidden");
+      logMsg("Automatic Flash File opening canceled by technician.");
+    }
+
+    function proceedAutoRedirect() {
+      if (redirectTimer) clearInterval(redirectTimer);
+      try {
+        localStorage.setItem("gsm_pending_filter", currentDetectedBrand);
+      } catch(e) {}
+      logMsg("Opening Flash File Page for " + currentDetectedBrand + "...");
+      window.location.href = targetRedirectUrl;
+    }
+
+    // Known VID/PID Map
+    const KNOWN_MODES = {
+      "05c6:9008": { name: "Qualcomm Snapdragon EDL 9008 Mode", badge: "QUALCOMM 9008", target: "#flash-files", brand: "Qualcomm", color: "bg-rose-500/20 text-rose-400 border-rose-500/40" },
+      "0e8d:0003": { name: "MediaTek BootROM (BROM) Mode", badge: "MTK BROM", target: "#flash-files", brand: "MediaTek", color: "bg-amber-500/20 text-amber-400 border-amber-500/40" },
+      "0e8d:2000": { name: "MediaTek Preloader VCOM Port", badge: "MTK PRELOADER", target: "#flash-files", brand: "Infinix & Tecno", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40" },
+      "04e8:685d": { name: "Samsung Galaxy Download Mode (Odin)", badge: "SAMSUNG ODIN", target: "#flash-files", brand: "Samsung", color: "bg-blue-500/20 text-blue-400 border-blue-500/40" },
+      "04e8:6860": { name: "Samsung Galaxy MTP / Modem Mode", badge: "SAMSUNG MTP", target: "#flash-files", brand: "Samsung", color: "bg-blue-500/20 text-blue-400 border-blue-500/40" },
+      "18d1:4ee0": { name: "Android Fastboot Mode", badge: "FASTBOOT", target: "#flash-files", brand: "Xiaomi", color: "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" },
+      "1782:4d00": { name: "Unisoc / Spreadtrum PAC Mode", badge: "UNISOC / SPD", target: "#flash-files", brand: "Infinix & Tecno", color: "bg-purple-500/20 text-purple-400 border-purple-500/40" }
+    };
+
+    function updateDetectedUI(vid, pid, modeName, badgeText, targetHash, colorClasses, brandName) {
+      document.getElementById("indicator-dot").className = "w-3 h-3 rounded-full bg-emerald-400 pulse-dot";
+      document.getElementById("indicator-text").textContent = "DEVICE CONNECTED — HARDWARE MODE RECOGNIZED";
+      document.getElementById("indicator-text").className = "text-xs font-mono font-bold text-emerald-400";
+
+      const badge = document.getElementById("detected-badge");
+      badge.textContent = badgeText;
+      badge.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold border " + colorClasses;
+
+      document.getElementById("device-title").textContent = modeName;
+      document.getElementById("attr-vid").textContent = "0x" + vid.toUpperCase();
+      document.getElementById("attr-pid").textContent = "0x" + pid.toUpperCase();
+      document.getElementById("attr-mode").textContent = badgeText;
+      document.getElementById("attr-port").textContent = "USB Handshake Active";
+
+      currentDetectedBrand = brandName || "Samsung";
+
+      logMsg("Device Recognized: " + modeName + " (VID: 0x" + vid.toUpperCase() + " PID: 0x" + pid.toUpperCase() + ")");
+      logMsg("Matching Brand Detected: " + currentDetectedBrand);
+      
+      // AUTO-REDIRECT TO MATCHING FLASH FILES!
+      startAutoRedirect(targetHash, currentDetectedBrand);
+    }
+
+    function simulateHardware(vid, pid, modeName, toolName, targetHash, colorClasses, brandName) {
+      logMsg("Simulating hardware connection: " + modeName + "...");
+      updateDetectedUI(vid, pid, modeName, modeName.split(" ")[0] + " MODE", targetHash, colorClasses, brandName || "All");
+    }
+
+    // WebUSB Integration
+    document.getElementById('btn-request-usb').addEventListener('click', async () => {
+      if (!('usb' in navigator)) {
+        alert('WebUSB is not supported in this browser. Please use Chrome or Edge.');
+        logMsg('WebUSB API not supported on this browser engine.');
+        return;
+      }
+      try {
+        logMsg('Requesting USB Device pairing dialog...');
+        const device = await navigator.usb.requestDevice({ filters: [] });
+        const vid = device.vendorId.toString(16).padStart(4, '0');
+        const pid = device.productId.toString(16).padStart(4, '0');
+        const key = `${vid}:${pid}`.toLowerCase();
+
+        logMsg(`Connected to USB Device: ${device.productName || 'Generic'} (VID: ${vid} PID: ${pid})`);
+        const found = KNOWN_MODES[key];
+        if (found) {
+          updateDetectedUI(vid, pid, found.name, found.badge, found.target, found.color, found.brand);
+        } else {
+          updateDetectedUI(vid, pid, `USB Mobile (${device.productName || 'Connected'})`, 'GENERIC USB', '#flash-files', 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30');
+        }
+      } catch (err) {
+        logMsg(`USB pairing canceled or error: ${err.message}`);
+      }
+    });
+
+    // Web Serial Integration
+    document.getElementById('btn-request-serial').addEventListener('click', async () => {
+      if (!('serial' in navigator)) {
+        alert('Web Serial is not supported in this browser. Please use Chrome or Edge.');
+        logMsg('Web Serial API not supported on this browser engine.');
+        return;
+      }
+      try {
+        logMsg('Requesting Serial COM Port pairing dialog...');
+        const port = await navigator.serial.requestPort();
+        const info = port.getInfo();
+        const vid = (info.usbVendorId || 0).toString(16).padStart(4, '0');
+        const pid = (info.usbProductId || 0).toString(16).padStart(4, '0');
+        logMsg(`Serial COM Port Paired: VID 0x${vid.toUpperCase()} PID 0x${pid.toUpperCase()}`);
+        updateDetectedUI(vid, pid, 'Diagnostic Serial COM Port', 'COM PORT ACTIVE', '#flash-files', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', 'All');
+      } catch (err) {
+        logMsg(`Serial pairing error: ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
